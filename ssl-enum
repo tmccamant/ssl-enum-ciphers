@@ -10,7 +10,6 @@ CIPHER_LINE_END=
 PROTOCOL=
 CIPHER=
 
-
 touch ${OUTPUT_FILE}
 rm -f ${OUTPUT_FILE}
 touch ${OUTPUT_FILE}
@@ -25,7 +24,6 @@ TARGET_PORT=`echo $line | cut -d, -f2`
 
 echo "Collecting ciphers for ${TARGET_HOSTNAME}"
 nmap --script ssl-enum-ciphers -p ${TARGET_PORT} ${TARGET_HOSTNAME} > ${CIPHER_TEMP}
-
 
 #SSL 3.0
 GREP_CIPHER=`grep SSLv3 ${CIPHER_TEMP} | cut -d" " -f4`
@@ -45,7 +43,6 @@ else
   echo "${PROTOCOL}" > /dev/null
 fi
 
-
 #TLS 1.0
 GREP_CIPHER=`grep TLSv1.0 ${CIPHER_TEMP} | cut -d" " -f4`
 if [ "${GREP_CIPHER}" == TLSv1.0 ]
@@ -63,7 +60,6 @@ if [ "${GREP_CIPHER}" == TLSv1.0 ]
 else
   echo "${PROTOCOL}" > /dev/null
 fi
-
 
 #TLS 1.1
 GREP_CIPHER=`grep TLSv1.1 ${CIPHER_TEMP} | cut -d" " -f4`
@@ -83,7 +79,6 @@ else
   echo "${PROTOCOL}" > /dev/null
 fi
 
-
 #TLS 1.2
 GREP_CIPHER=`grep TLSv1.2 ${CIPHER_TEMP} | cut -d" " -f4`
 if [ "${GREP_CIPHER}" == TLSv1.2 ]
@@ -101,7 +96,6 @@ if [ "${GREP_CIPHER}" == TLSv1.2 ]
 else
   echo "${PROTOCOL}" > /dev/null
 fi
-
 
 let COUNTER=COUNTER+1
 done < $1
