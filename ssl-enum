@@ -1,0 +1,107 @@
+#!/bin/bash
+
+INPUT_FILE=$1
+OUTPUT_FILE="output.csv"
+CIPHER_TEMP="/tmp/ciphers"
+TARGET_HOSTNAME=
+TARGET_PORT=
+CIPHER_LINE_START=
+CIPHER_LINE_END=
+PROTOCOL=
+CIPHER=
+
+
+touch ${OUTPUT_FILE}
+rm -f ${OUTPUT_FILE}
+touch ${OUTPUT_FILE}
+
+echo "HOSTNAME,PORT,PROTOCOL,CIPHER" > ${OUTPUT_FILE}
+
+while read line ;do
+set TARGET_HOSTNAME
+set TARGET_PORT
+TARGET_HOSTNAME=`echo $line | cut -d, -f1`
+TARGET_PORT=`echo $line | cut -d, -f2`
+
+echo "Collecting ciphers for ${TARGET_HOSTNAME}"
+nmap --script ssl-enum-ciphers -p ${TARGET_PORT} ${TARGET_HOSTNAME} > ${CIPHER_TEMP}
+
+
+#SSL 3.0
+GREP_CIPHER=`grep SSLv3 ${CIPHER_TEMP} | cut -d" " -f4`
+if [ "${GREP_CIPHER}" == SSLv3 ]
+  then
+  PROTOCOL="SSLv3"
+  CIPHER_LINE_START=`grep -n ${PROTOCOL} ${CIPHER_TEMP} | cut -d: -f1`
+  let CIPHER_LINE_START=CIPHER_LINE_START+2
+  CIPHER_LINE_END=`grep -n -A1 ${PROTOCOL} ${CIPHER_TEMP} | grep Ciphers | cut -d"(" -f2 | cut -d")" -f 1`
+  let CIPHER_LINE_END=CIPHER_LINE_END+CIPHER_LINE_START
+  while [ ${CIPHER_LINE_START} -lt ${CIPHER_LINE_END} ]; do
+    echo -en "${TARGET_HOSTNAME},${TARGET_PORT},${PROTOCOL}," >> ${OUTPUT_FILE}
+    sed "${CIPHER_LINE_START}"!d ${CIPHER_TEMP} | cut -d" " -f8 >> ${OUTPUT_FILE}
+    let CIPHER_LINE_START=CIPHER_LINE_START+1
+  done
+else
+  echo "${PROTOCOL}" > /dev/null
+fi
+
+
+#TLS 1.0
+GREP_CIPHER=`grep TLSv1.0 ${CIPHER_TEMP} | cut -d" " -f4`
+if [ "${GREP_CIPHER}" == TLSv1.0 ]
+  then
+  PROTOCOL="TLSv1.0"
+  CIPHER_LINE_START=`grep -n ${PROTOCOL} ${CIPHER_TEMP} | cut -d: -f1`
+  let CIPHER_LINE_START=CIPHER_LINE_START+2
+  CIPHER_LINE_END=`grep -n -A1 ${PROTOCOL} ${CIPHER_TEMP} | grep Ciphers | cut -d"(" -f2 | cut -d")" -f 1`
+  let CIPHER_LINE_END=CIPHER_LINE_END+CIPHER_LINE_START
+  while [ ${CIPHER_LINE_START} -lt ${CIPHER_LINE_END} ]; do
+    echo -en "${TARGET_HOSTNAME},${TARGET_PORT},${PROTOCOL}," >> ${OUTPUT_FILE}
+    sed "${CIPHER_LINE_START}"!d ${CIPHER_TEMP} | cut -d" " -f8 >> ${OUTPUT_FILE}
+    let CIPHER_LINE_START=CIPHER_LINE_START+1
+  done
+else
+  echo "${PROTOCOL}" > /dev/null
+fi
+
+
+#TLS 1.1
+GREP_CIPHER=`grep TLSv1.1 ${CIPHER_TEMP} | cut -d" " -f4`
+if [ "${GREP_CIPHER}" == TLSv1.1 ]
+  then
+  PROTOCOL="TLSv1.1"
+  CIPHER_LINE_START=`grep -n ${PROTOCOL} ${CIPHER_TEMP} | cut -d: -f1`
+  let CIPHER_LINE_START=CIPHER_LINE_START+2
+  CIPHER_LINE_END=`grep -n -A1 ${PROTOCOL} ${CIPHER_TEMP} | grep Ciphers | cut -d"(" -f2 | cut -d")" -f 1`
+  let CIPHER_LINE_END=CIPHER_LINE_END+CIPHER_LINE_START
+  while [ ${CIPHER_LINE_START} -lt ${CIPHER_LINE_END} ]; do
+    echo -en "${TARGET_HOSTNAME},${TARGET_PORT},${PROTOCOL}," >> ${OUTPUT_FILE}
+    sed "${CIPHER_LINE_START}"!d ${CIPHER_TEMP} | cut -d" " -f8 >> ${OUTPUT_FILE}
+    let CIPHER_LINE_START=CIPHER_LINE_START+1
+  done
+else
+  echo "${PROTOCOL}" > /dev/null
+fi
+
+
+#TLS 1.2
+GREP_CIPHER=`grep TLSv1.2 ${CIPHER_TEMP} | cut -d" " -f4`
+if [ "${GREP_CIPHER}" == TLSv1.2 ]
+  then
+  PROTOCOL="TLSv1.2"
+  CIPHER_LINE_START=`grep -n ${PROTOCOL} ${CIPHER_TEMP} | cut -d: -f1`
+  let CIPHER_LINE_START=CIPHER_LINE_START+2
+  CIPHER_LINE_END=`grep -n -A1 ${PROTOCOL} ${CIPHER_TEMP} | grep Ciphers | cut -d"(" -f2 | cut -d")" -f 1`
+  let CIPHER_LINE_END=CIPHER_LINE_END+CIPHER_LINE_START
+  while [ ${CIPHER_LINE_START} -lt ${CIPHER_LINE_END} ]; do
+    echo -en "${TARGET_HOSTNAME},${TARGET_PORT},${PROTOCOL}," >> ${OUTPUT_FILE}
+    sed "${CIPHER_LINE_START}"!d ${CIPHER_TEMP} | cut -d" " -f8 >> ${OUTPUT_FILE}
+    let CIPHER_LINE_START=CIPHER_LINE_START+1
+  done
+else
+  echo "${PROTOCOL}" > /dev/null
+fi
+
+
+let COUNTER=COUNTER+1
+done < $1
