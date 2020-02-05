@@ -9,10 +9,6 @@ CIPHER_LINE_START=
 CIPHER_LINE_END=
 OUTPUT_FILE="output.csv"
 
-touch ${OUTPUT_FILE}
-rm -f ${OUTPUT_FILE}
-touch ${OUTPUT_FILE}
-
 grep_ciphers () {
         CIPHER_LINE_START=`grep -n "${PROTOCOL}" ${CIPHER_TEMP} | cut -d':' -f1`
         if [ ! -z ${CIPHER_LINE_START} ]; then
